@@ -1,6 +1,15 @@
 from rich import print
 from BlockScript.lexer import Lexer
+import BlockScript.Interpreter.values
+from BlockScript.Errors.base import SpanError
 
+FILENAME = "local/main.bs"
 
-lexer = Lexer("main.bs", "1 + 2 \n3+4")
-print(lexer.lex())
+with open(FILENAME, "r") as f:
+    text = f.read()
+
+lexer = Lexer(FILENAME, text)
+try:
+    print(lexer.lex())
+except SpanError as e:
+    e.print_error()
