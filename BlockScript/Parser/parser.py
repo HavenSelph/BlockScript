@@ -25,3 +25,4 @@ class Parser:
         raise Exception(f"Expected {kind} but got {token.kind}")
 
     def parse(self) -> Program:
+        pass
