@@ -9,6 +9,12 @@ with open(FILENAME, "r") as f:
     text = f.read()
 
 lexer = Lexer(FILENAME, text)
+tokens = lexer.lex()
+SpanError(
+    tokens[1].span,
+    "This is a test error",
+).print_error()
+
 try:
     print(lexer.lex())
 except SpanError as e:
