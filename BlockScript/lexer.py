@@ -1,5 +1,6 @@
 from .common import Location, Span
 from .tokens import Token, TokenKind, characters, keywords
+from BlockScript.Errors.base import SpanError
 
 
 class Lexer:
