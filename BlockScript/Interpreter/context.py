@@ -28,4 +28,3 @@ class Scope:
 
     def define(self, name: str, value: Value) -> None:
         self.variables[name] = value
-
