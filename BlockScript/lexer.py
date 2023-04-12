@@ -13,8 +13,8 @@ class Lexer:
         self.cur = self.text[self.index]
         self.tokens = []
 
-    def location(self) -> Location:
-        return Location(self.filename, self.line, self.column)
+    def location(self, offset: int=0) -> Location:
+        return Location(self.filename, self.line, self.column+offset)
 
     def advance(self, i: int=1) -> None:
         if self.cur == "\n":
@@ -33,18 +33,22 @@ class Lexer:
 
     def push_simple(self, kind: TokenKind, size: int=1) -> None:
         start = self.location()
-        for _ in range(size):
-            self.advance()
-        end = self.location()
+        self.advance(size)
+        end = self.location(offset=-1)
         self.tokens.append(Token(kind, None, Span(start, end)))
 
     def push(self, kind: TokenKind, data: int | float | str | None, start: Location, end: Location) -> None:
         self.tokens.append(Token(kind, data, Span(start, end)))
 
+
     def lex(self) -> list[Token]:
+        space = False
         while self.cur:
             match self.cur:
+                case "\n":
+                    self.advance()
                 case char if char.isspace():
+                    self.tokens[-1].space_after = True
                     self.advance()
                 case char if char.isalpha():
                     self.lex_identifier()
@@ -65,7 +69,7 @@ class Lexer:
         while self.cur and (self.cur.isalnum() or self.cur == "_"):
             identifier += self.cur
             self.advance()
-        end = Location(self.filename, self.line, self.column)
+        end = self.location(offset=-1)
         kind = keywords.get(identifier, TokenKind.Identifier)
         self.push(kind, identifier, start, end)
 
@@ -77,9 +81,11 @@ class Lexer:
                 self.advance()
             if self.cur == "." and "." in number:
                 raise Exception("Unexpected character '.'")
+            if self.cur == "." and self.peek(1) == "_":
+                raise Exception("Unexpected character '_'")
             number += self.cur
             self.advance()
-        end = Location(self.filename, self.line, self.column)
+        end = self.location(offset=-1)
         if "." in number:
             self.push(TokenKind.Float, float(number), start, end)
         else:
