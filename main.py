@@ -1,18 +1,18 @@
 from rich import print
+import BlockScript.Errors.base
 from BlockScript.lexer import Lexer
-import BlockScript.Interpreter.values
-from BlockScript.Errors.base import SpanError
+from BlockScript.Parser.parser import Parser
+from BlockScript.Interpreter.ast import Scope
 
 FILENAME = "local/main.bs"
 
 with open(FILENAME, "r") as f:
     text = f.read()
 
-lexer = Lexer(FILENAME, text)
-tokens = lexer.lex()
-SpanError(
-    tokens[-1].span,
-    "This is a test error",
-).print_error()
-
-print(tokens)
+try:
+    lexer = Lexer(FILENAME, text)
+    parser = Parser(lexer.lex())
+    ast = parser.parse()
+    print(ast.run(Scope()))
+except BlockScript.Errors.base.BlockScriptError as e:
+    e.print_error()
