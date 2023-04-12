@@ -3,7 +3,9 @@ from BlockScript.common import Location, Span
 
 
 class BlockScriptError(Exception):
-    pass
+    def print_error(self) -> None:
+        """Prints the error to the terminal."""
+        raise NotImplementedError()
 
 
 class SpanError(BlockScriptError):
