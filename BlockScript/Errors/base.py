@@ -7,9 +7,10 @@ class BlockScriptError(Exception):
 
 
 class SpanError(BlockScriptError):
-    def __init__(self, span: Span, message: str) -> None:
+    def __init__(self, span: Span, message: str, flag_text: str="") -> None:
         self.span = span
         self.message = message
+        self.flag_text = flag_text
 
     def print_error(self) -> None:
         """Prints the error to the terminal."""
@@ -27,7 +28,7 @@ class SpanError(BlockScriptError):
             if line_num + 1 == self.span.start.line:
                 line = line[:self.span.start.column-1] + f"\u001b[31m{line[self.span.start.column-1:self.span.end.column]}\u001b[0m" + line[self.span.end.column:]
                 print(f"{line_number} │ {line}")
-                print(f"{' '*(line_no_width+1)}├{'─' * self.span.start.column}\u001b[31m{'^' * (self.span.end.column - self.span.start.column + 1)}\u001b[0m")
+                print(f"{' '*(line_no_width+1)}├{'─' * self.span.start.column}\u001b[31m{'^' * (self.span.end.column - self.span.start.column + 1)}\u001b[0m {self.flag_text}")
             else:
                 print(f"{line_number} │ {line}")
 
