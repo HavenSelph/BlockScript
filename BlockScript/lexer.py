@@ -23,26 +23,13 @@ class Lexer:
         :param offset: The offset from the current character (negative or positive)
         :return: The location of the character at the offset
         """
-        def get_column(offset: int, line: int=self.line, column: int=self.column, index: int=self.index) -> list[int,int]:
-            """
-            offset can be negative or positive, recursively call this function until offset is 0 and return the column and line
-
-            THIS WAS MADE FOR FUN, WILL BE CHANGED IN FUTURE COMMIT
-            """
-            if line < 1:
-                raise Exception("Line number cannot be less than 1, this is a lexer bug.")
-            if offset < 0:
-                if column+offset >= 1:
-                    return [line, column+offset]
-                else:
-                    return get_column(offset+column, line-1, len(self.text[:index].split("\n")), self.text[:index].rfind("\n")-1)
-            elif offset > 0:
-                if column+offset <= len(self.text[:index].split("\n")[-1]):
-                    return [line, column+offset]
-                else:
-                    return get_column(offset-(len(self.text[:index].split("\n")[-1])-column), line+1, 1, index+1)
         if offset != 0:
-            return Location(self.filename, *get_column(offset, self.index))
+            index = self.index + offset
+            if index < 0 or index >= len(self.text):
+                raise Exception("Offset out of bounds, this is a bug.")
+            line = self.text[:index].count("\n") + 1
+            column = index - self.text[:index].rfind("\n")
+            return Location(self.filename, line, column)
         return Location(self.filename, self.line, self.column+offset)
 
     def cur_span(self) -> Span:
@@ -72,13 +59,13 @@ class Lexer:
         self.tokens.append(Token(kind, data, Span(start, end)))
 
     def lex(self) -> list[Token]:
-        space = False
         while self.cur:
             match self.cur:
                 case "\n":
                     self.advance()
                 case char if char.isspace():
-                    self.tokens[-1].space_after = True
+                    if len(self.tokens) > 0:
+                        self.tokens[-1].space_after = True
                     self.advance()
                 case char if char.isalpha():
                     self.lex_identifier()
