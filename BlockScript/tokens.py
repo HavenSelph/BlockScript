@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import Enum, auto
 from .common import Span
 
@@ -37,15 +36,14 @@ keywords = {
 }
 
 
-@dataclass
 class Token:
     def __init__(self, kind: TokenKind, data: int | float | str | None, span: Span) -> None:
         self.kind = kind
         self.data = data
         self.span = span
 
-    def __str__(self) -> str:
-        return f"{self.kind} {self.span}"
+        # metadata
+        self.space_after = False
 
     def __repr__(self) -> str:
-        return f"Token({self.kind}, {self.data.__repr__()}, {self.span})"
+        return f"Token({self.kind}, {self.data.__repr__()}, {self.space_after=}, {self.span})"
